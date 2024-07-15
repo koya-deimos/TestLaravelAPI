@@ -1,23 +1,24 @@
-# Use the official Python image as the base image
-FROM python:3.10-slim
+FROM php:latest
 
-# Set working directory
-WORKDIR /usr/src/app
+RUN curl -sS https://getcomposer.org/installer | php -- \
+     --install-dir=/usr/local/bin --filename=composer
 
-# Install any dependencies
-RUN pip install Flask
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-# Create a simple Flask application
-RUN echo 'from flask import Flask\n\
-app = Flask(__name__)\n\
-@app.route("/")\n\
-def hello():\n\
-    return "Hello, World!"\n\
-if __name__ == "__main__":\n\
-    app.run(host="0.0.0.0", port=5000)' > app.py
+RUN apt-get update && apt-get install -y zlib1g-dev \
+    libzip-dev \
+    unzip
 
-# Expose port 5000
-EXPOSE 5000
+RUN docker-php-ext-install pdo pdo_mysql sockets zip
 
-# Command to run the application
-CMD ["python", "app.py"]
+RUN mkdir /app
+
+ADD . /app
+
+WORKDIR /app
+
+RUN composer install
+
+CMD php artisan serve --host=0.0.0.0 --port=8000
+
+EXPOSE 8000
