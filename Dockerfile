@@ -1,37 +1,42 @@
-# Stage 1: Build stage
-FROM composer:latest AS build
+FROM php:8.2-fpm
 
-# Set working directory
-WORKDIR /app
+ARG user
+ARG uid
 
-# Copy composer.json and composer.lock
-COPY composer.json composer.lock ./
-
-# Install PHP dependencies
-RUN composer install --no-dev --no-scripts --prefer-dist --no-progress --no-interaction
-
-# Stage 2: Production stage
-FROM php:8.1-fpm-alpine
-
-# Set working directory
-WORKDIR /var/www
-
-# Install system dependencies
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    nginx \
-    libpng-dev \
-    libjpeg-turbo-dev \
-    libfreetype6-dev \
-    bash \
-    autoconf \
-    g++ \
-    make \
-    curl \
+RUN apt update && apt install -y \
     git \
-    unzip \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev
+RUN apt clean && rm -rf /var/lib/apt/lists/*
+RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+RUN useradd -G www-data,root -u $uid -d /home/$user $user
+RUN mkdir -p /home/$user/.composer && \
+    chown -R $user:$user /home/$user
+
+WORKDIR /var/www
+# Set working directory
+
+# Install system dependencies
+# Install system dependencies
+# RUN apt-get update && apt-get install -y \
+#     nginx \
+#     libpng-dev \
+#     libjpeg-turbo-dev \
+#     libfreetype6-dev \
+#     bash \
+#     autoconf \
+#     g++ \
+#     make \
+#     curl \
+#     git \
+#     unzip \
+#     && docker-php-ext-configure gd --with-freetype --with-jpeg \
+#     && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
 
 # # Install PHP extensions
 # RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
