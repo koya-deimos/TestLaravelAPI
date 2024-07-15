@@ -18,7 +18,7 @@ ADD . /app
 
 WORKDIR /app
 
-RUN composer install
+RUN composer install --debug
 
 CMD php artisan serve --host=0.0.0.0 --port=8000
 
