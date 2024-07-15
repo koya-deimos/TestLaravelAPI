@@ -18,7 +18,7 @@ WORKDIR /var/www
 
 # Install system dependencies
 # Install system dependencies
-RUN apk update && apk add --no-cache \
+RUN apt-get update && apt-get install -y \
     nginx \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -33,9 +33,9 @@ RUN apk update && apk add --no-cache \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
 
-# Install PHP extensions
-RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
+# # Install PHP extensions
+# RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+#     && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
 
 # Copy nginx configuration file
 COPY nginx.conf /etc/nginx/conf.d/default.conf
