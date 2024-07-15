@@ -1,61 +1,24 @@
-FROM php:8.2-fpm
+FROM php:8.0.20
 
-ARG user
-ARG uid
-
-RUN apt update && apt install -y \
-    git \
-    curl \
-    libpng-dev \
-    libonig-dev \
-    libxml2-dev
-RUN apt clean && rm -rf /var/lib/apt/lists/*
-RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd
+RUN curl -sS https://getcomposer.org/installer | php -- \
+     --install-dir=/usr/local/bin --filename=composer
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
-RUN useradd -G www-data,root -u $uid -d /home/$user $user
-RUN mkdir -p /home/$user/.composer && \
-    chown -R $user:$user /home/$user
+RUN apt-get update && apt-get install -y zlib1g-dev \
+    libzip-dev \
+    unzip
 
-WORKDIR /var/www
-# Set working directory
+RUN docker-php-ext-install pdo pdo_mysql sockets zip
 
-# Install system dependencies
-# Install system dependencies
-# RUN apt-get update && apt-get install -y \
-#     nginx \
-#     libpng-dev \
-#     libjpeg-turbo-dev \
-#     libfreetype6-dev \
-#     bash \
-#     autoconf \
-#     g++ \
-#     make \
-#     curl \
-#     git \
-#     unzip \
-#     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-#     && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
+RUN mkdir /app
 
-# # Install PHP extensions
-# RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
-#     && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
+ADD . /app
 
-# Copy nginx configuration file
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+WORKDIR /app
 
-# Copy application code from build stage
-COPY --from=build /app /var/www
+RUN composer install
 
-# Copy existing application directory permissions
-COPY --chown=www-data:www-data . /var/www
+CMD php artisan serve --host=0.0.0.0 --port=8000
 
-# Change current user to www
-USER www-data
-
-# Expose port 80 for Nginx
-EXPOSE 80
-
-# Start PHP-FPM and Nginx
-CMD ["sh", "-c", "php-fpm & nginx -g 'daemon off;'"]
+EXPOSE 8000
