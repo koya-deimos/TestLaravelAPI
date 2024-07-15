@@ -17,7 +17,8 @@ FROM php:8.1-fpm-alpine
 WORKDIR /var/www
 
 # Install system dependencies
-RUN apk add --no-cache \
+# Install system dependencies
+RUN apk update && apk add --no-cache \
     nginx \
     libpng-dev \
     libjpeg-turbo-dev \
@@ -28,7 +29,9 @@ RUN apk add --no-cache \
     make \
     curl \
     git \
-    unzip
+    unzip \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) gd pdo_mysql mbstring exif pcntl bcmath
 
 # Install PHP extensions
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
