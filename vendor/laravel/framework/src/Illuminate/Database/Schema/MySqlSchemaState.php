@@ -85,10 +85,10 @@ class MySqlSchemaState extends SchemaState
      */
     protected function baseDumpCommand()
     {
-        $command = 'mysqldump '.$this->connectionString().' --skip-add-locks --skip-comments --skip-set-charset --tz-utc';
+        $command = 'mysqldump '.$this->connectionString().' --no-tablespaces --skip-add-locks --skip-comments --skip-set-charset --tz-utc --column-statistics=0';
 
         if (! $this->connection->isMaria()) {
-            $command .= ' --column-statistics=0 --set-gtid-purged=OFF';
+            $command .= ' --set-gtid-purged=OFF';
         }
 
         return $command.' "${:LARAVEL_LOAD_DATABASE}"';
@@ -125,7 +125,7 @@ class MySqlSchemaState extends SchemaState
             'LARAVEL_LOAD_HOST' => is_array($config['host']) ? $config['host'][0] : $config['host'],
             'LARAVEL_LOAD_PORT' => $config['port'] ?? '',
             'LARAVEL_LOAD_USER' => $config['username'],
-            'LARAVEL_LOAD_PASSWORD' => $config['password'],
+            'LARAVEL_LOAD_PASSWORD' => $config['password'] ?? '',
             'LARAVEL_LOAD_DATABASE' => $config['database'],
         ];
     }
