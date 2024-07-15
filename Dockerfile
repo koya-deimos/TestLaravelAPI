@@ -21,8 +21,8 @@ WORKDIR /app
 RUN /bin/echo "checking composer version"
 
 RUN composer --version
-RUN composer install --dry-run
+RUN composer install
 
-CMD php artisan serve --host=0.0.0.0 --port=8000
+CMD ["php artisan serve --host=0.0.0.0 --port=8000"]
 
 EXPOSE 8000
