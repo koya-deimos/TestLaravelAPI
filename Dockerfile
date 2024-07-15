@@ -18,9 +18,10 @@ ADD . /app
 
 WORKDIR /app
 
-RUN echo "checking composer version"
+RUN /bin/echo "checking composer version"
+
 RUN composer --version
-RUN composer install --debug
+RUN composer install --dry-run
 
 CMD php artisan serve --host=0.0.0.0 --port=8000
 
