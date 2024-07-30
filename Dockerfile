@@ -1,5 +1,15 @@
 FROM php:latest
 
+# Define a build-time variable
+ARG TestKoya
+
+# Set an environment variable using the build-time variable
+ENV Test_Koya=${TestKoya}
+
+# Print the environment variable to verify
+RUN echo "The value of Test_Koya is: $Test_Koya"
+
+
 RUN curl -sS https://getcomposer.org/installer | php -- \
      --install-dir=/usr/local/bin --filename=composer
 
