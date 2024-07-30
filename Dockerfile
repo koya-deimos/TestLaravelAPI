@@ -1,7 +1,7 @@
 FROM php:latest
 
 # Define a build-time variable
-ARG TestKoya
+#ARG TestKoya
 
 # Set an environment variable using the build-time variable
 ENV Test_Koya=${TestKoya}
